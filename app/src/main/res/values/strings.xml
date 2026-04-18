@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">ReelCount</string>
+    <string name="accessibility_service_label">ReelCount Tracker</string>
+    <string name="accessibility_service_description">ReelCount uses Accessibility Service to detect and count reels/shorts you watch on Instagram and YouTube. No content is read or stored — only scroll events are tracked. All data stays on your device.</string>
+</resources>
