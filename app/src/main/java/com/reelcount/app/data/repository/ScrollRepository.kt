@@ -15,6 +15,7 @@ interface ScrollRepository {
     fun getTodayTotalScrollCount(): Flow<Int>
     fun getTodayEvents(): Flow<List<ScrollEventEntity>>
     fun getTodayStats(): Flow<DailyStatsEntity?>
+    fun getStatsForDate(date: String): Flow<DailyStatsEntity?>   // query any date
     fun getWeeklyStats(): Flow<List<DailyStatsEntity>>
     fun getRecentEvents(limit: Int): Flow<List<ScrollEventEntity>>
     fun getSessionsForToday(): Flow<List<ReelSessionEntity>>
@@ -40,11 +41,25 @@ class ScrollRepositoryImpl(
 
     private suspend fun updateDailyStats(app: TargetApp) {
         val today = today()
-        // We re-query counts to get accurate numbers (avoids race conditions)
-        // In practice, daily stats are rebuilt on each reel event
-        val currentStats = dailyStatsDao.getStatsForDate(today)
-        // We'll update via a separate query — simplified approach:
-        // DailyStats are recalculated in ViewModel from the flow, so we just touch the table
+
+        // Read current stats (or start from zero for this day)
+        val current = dailyStatsDao.getStatsForDateOnce(today)
+            ?: DailyStatsEntity(
+                date = today,
+                totalReels = 0,
+                instagramReels = 0,
+                youtubeShorts = 0,
+                totalWatchTimeMs = 0L,
+                sessionCount = 0
+            )
+
+        val updated = current.copy(
+            totalReels = current.totalReels + 1,
+            instagramReels = if (app == TargetApp.INSTAGRAM) current.instagramReels + 1 else current.instagramReels,
+            youtubeShorts = if (app == TargetApp.YOUTUBE) current.youtubeShorts + 1 else current.youtubeShorts
+        )
+
+        dailyStatsDao.insertOrUpdate(updated)
     }
 
     override suspend fun upsertSession(session: ReelSessionEntity) {
@@ -65,6 +80,9 @@ class ScrollRepositoryImpl(
 
     override fun getTodayStats(): Flow<DailyStatsEntity?> =
         dailyStatsDao.getStatsForDate(today())
+
+    override fun getStatsForDate(date: String): Flow<DailyStatsEntity?> =
+        dailyStatsDao.getStatsForDate(date)
 
     override fun getWeeklyStats(): Flow<List<DailyStatsEntity>> =
         dailyStatsDao.getLastSevenDays()

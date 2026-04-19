@@ -55,7 +55,10 @@ interface DailyStatsDao {
     suspend fun insertOrUpdate(stats: DailyStatsEntity)
 
     @Query("SELECT * FROM daily_stats WHERE date = :date")
-    fun getStatsForDate(date: String): Flow<DailyStatsEntity?>
+    fun getStatsForDate(date: String): Flow<DailyStatsEntity?>  // reactive, for UI
+
+    @Query("SELECT * FROM daily_stats WHERE date = :date")
+    suspend fun getStatsForDateOnce(date: String): DailyStatsEntity?  // one-shot, for write logic
 
     @Query("SELECT * FROM daily_stats WHERE date BETWEEN :startDate AND :endDate ORDER BY date ASC")
     fun getStatsForRange(startDate: String, endDate: String): Flow<List<DailyStatsEntity>>

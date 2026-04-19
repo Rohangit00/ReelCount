@@ -9,6 +9,7 @@ import androidx.compose.runtime.*
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.navigation.compose.*
 import com.reelcount.app.ui.dashboard.DashboardScreen
+import com.reelcount.app.ui.history.HistoryScreen
 import com.reelcount.app.ui.onboarding.OnboardingScreen
 import com.reelcount.app.ui.settings.SettingsScreen
 import com.reelcount.app.ui.theme.ReelCountTheme
@@ -17,6 +18,7 @@ import dagger.hilt.android.AndroidEntryPoint
 object Routes {
     const val ONBOARDING = "onboarding"
     const val DASHBOARD = "dashboard"
+    const val HISTORY = "history"
     const val SETTINGS = "settings"
 }
 
@@ -54,8 +56,14 @@ class MainActivity : ComponentActivity() {
                         DashboardScreen(
                             onNavigateToSettings = {
                                 navController.navigate(Routes.SETTINGS)
+                            },
+                            onNavigateToHistory = {
+                                navController.navigate(Routes.HISTORY)
                             }
                         )
+                    }
+                    composable(Routes.HISTORY) {
+                        HistoryScreen(onBack = { navController.popBackStack() })
                     }
                     composable(Routes.SETTINGS) {
                         SettingsScreen(
